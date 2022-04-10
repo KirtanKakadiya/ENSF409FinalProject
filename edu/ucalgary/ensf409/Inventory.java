@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.plaf.nimbus.State;
 import java.sql.*;
+import java.util.*;
 
 public class Inventory {
     private Food foodItem;
-    private Nutrition nutritionalFacts;
-    //private String foodQuantity = "";
+    private String foodQuantity = "";
     private ArrayList<Inventory> items = new ArrayList<>();
-
+    private Nutrition nutritionalFacts;
     private Connection dbConnect;
     private ResultSet results;
 
@@ -65,8 +65,10 @@ public class Inventory {
 
 
     }
-
-
-
-
 }
+}
+
+
+
+
+
