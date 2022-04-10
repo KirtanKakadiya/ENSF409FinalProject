@@ -13,7 +13,7 @@ import java.sql.*;
 import java.util.*;
 
 public class Inventory {
-    private static Food foodItem;
+    private Food foodItem;
     private String foodQuantity = "";
     private static ArrayList<Inventory> items = new ArrayList<>();
     private Nutrition nutritionalFacts;
@@ -40,11 +40,10 @@ public class Inventory {
         }
     }
 
-    public String getDataFromAvailableFood() throws SQLException{
-        StringBuilder output = new StringBuilder(300);
+    public void getDataFromAvailableFood() throws SQLException{
+        initializeConnection();
         try {
             Statement myStatement = dbConnect.createStatement();
-            //System.out.println("markes");
             results = myStatement.executeQuery("SELECT * FROM available_food");
 
             while(results.next()){
@@ -54,12 +53,10 @@ public class Inventory {
                 int protein = Integer.parseInt(results.getString("ProContent"));
                 int other = Integer.parseInt(results.getString("Other"));
                 int calories = Integer.parseInt(results.getString("Calories"));
-                System.out.println( results.getString("ItemID") + " " + results.getString("Name") + " " + fruitVeggie + " "+ protein +" "+other + " " +calories);
 
                 nutritionalFacts = new Nutrition(wholeGrain,fruitVeggie,protein,other,calories);
                 foodItem = new Food(results.getString("ItemID"), results.getString("Name"), nutritionalFacts);
                 insertItem(foodItem);
-                //System.out.println(results.getString("Name") + " " + results.getString("GrainContent") + " " + results.getString("FVContent") + " " + results.getString("ProContent") + " " + results.getString("Other") + " ");
                 
             }
             myStatement.close();
@@ -68,19 +65,19 @@ public class Inventory {
             System.out.println("failed");
             //TODO: Need to make it so it print an error message in the GUI but the program doesnt terminate
     }
-    return output.toString().trim();
 
     }
 
-    public void deleteItemFromAvailableFood(String itemName) throws SQLException{
+    public void deleteItemFromAvailableFood(String itemID) throws SQLException{
+        initializeConnection();
         try{
-            String query = "DELETE FROM available_food WHERE Name = (?)";
+            String query = "DELETE FROM available_food WHERE ItemID = (?)";
             PreparedStatement myStmt = dbConnect.prepareStatement(query);
-            myStmt.setString(1, itemName);
+            myStmt.setString(1, itemID);
 
             int rowCount = myStmt.executeUpdate();
-            if(rowCount!= 1){
-                throw new SQLException();
+            if(rowCount == 0){
+                throw new SQLException( "No rows were changed");
             }
             myStmt.close();
 
@@ -93,16 +90,7 @@ public class Inventory {
     }
 
 
-    
-    public static void main(String[] args) throws SQLException {
-        Inventory myJDBC = new Inventory();
-        myJDBC.initializeConnection();
-
-        
-        System.out.println(myJDBC.getDataFromAvailableFood());
-
-
-    }
+  
 
     
 }

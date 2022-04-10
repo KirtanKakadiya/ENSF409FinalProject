@@ -46,4 +46,24 @@ public class Nutrition{
         return this.dailyCalories;
     }
 
+    public void setGrainPercentage(int wholeGrain){
+        this.wholeGrainPercentage = wholeGrain;
+    }
+
+    public void setFVPercentage(int FVPercentage){
+        this.fruitVeggiePercentage = FVPercentage;
+    }
+
+    public void setProteinPercentage(int proteinPercntage){
+        this.proteinPercentage = proteinPercntage;
+    }
+
+    public void setOtherPercentage(int otherPercentage){
+        this.otherPercentage = otherPercentage;
+    }
+
+    public void setDailyCalories(int dailyCalories){
+       this.dailyCalories = dailyCalories;
+    }
+
 }
