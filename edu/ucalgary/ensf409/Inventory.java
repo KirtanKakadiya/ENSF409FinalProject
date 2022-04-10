@@ -6,12 +6,12 @@
 
 package edu.ucalgary.ensf409;
 
-import java.util.LinkedList;
+import java.util.*;
 
 public class Inventory {
     private Food foodItem;
     private String foodQuantity = "";
-    private LinkedList<Inventory> items = new LinkedList<>();
+    private ArrayList<Inventory> items = new ArrayList<>();
 
     public Inventory(Food foodItem, String foodQuantity) throws IllegalArgumentException{
         this.foodItem = foodItem;
