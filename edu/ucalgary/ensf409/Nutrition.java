@@ -6,12 +6,13 @@
 
 package edu.ucalgary.ensf409;
 
-public class Nutrition {
+public class Nutrition{
     private int wholeGrainPercentage = 0;
     private int fruitVeggiePercentage = 0;
     private int proteinPercentage = 0;
     private int otherPercentage = 0;
     private int dailyCalories = 0;
+
 
     public Nutrition(int wholeGrain, int fruitVeggie, int protein, int other, int calories){
         this.wholeGrainPercentage = wholeGrain;
@@ -21,6 +22,10 @@ public class Nutrition {
         this.dailyCalories = calories;
     }
 
+    public Nutrition createNutrition(int wholeGrain, int fruitVeggie, int protein, int other, int calories){
+        Nutrition temp = new Nutrition(wholeGrain,fruitVeggie,protein,other,calories);
+        return temp;
+    }
     public int getGrainPercentage(){
         return this.wholeGrainPercentage;
     }
