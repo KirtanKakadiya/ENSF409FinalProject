@@ -10,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.RoundRectangle2D;
 
 public class ProjectGUI extends JFrame implements ActionListener {
     private static JFrame frame;
@@ -26,6 +25,7 @@ public class ProjectGUI extends JFrame implements ActionListener {
     private static JLabel adultFemale;
     private static JLabel chUnder8;
     private static JLabel chOver8;
+    private static JLabel success;
     private static JComboBox combo1;
     private static JComboBox combo2;
     private static JComboBox combo3;
@@ -35,11 +35,22 @@ public class ProjectGUI extends JFrame implements ActionListener {
     private static JLabel choiceOfTrans;
     private static JRadioButton boxYes;
     private static JRadioButton boxNo;
+    private static ButtonGroup group1;
     private static JButton generateForm;
     private static JProgressBar progressBar;
     private static final String[] array = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18",
     "19","20","21","22","23","24","25","26","27","28","29","30"};
-    private static final String[] choiceHampers = {"Balanced", "Calorie Deficit (low calories)", "Muscle Building (high protein)", "Keto (low grains/carbs)"};
+    private static final String[] choiceHampers = {"Balanced", "Calorie Deficit (low calories)",
+            "Muscle Building (high protein)", "Keto (low grains/carbs)"};
+
+    private boolean choice;
+    private String familyName;
+    private String currDate;
+    private int numAdultMales;
+    private int numAdultFemales;
+    private int numChildUnder8;
+    private int numChildOver8;
+    private int hamperChoice;
 
     public static void main(String[] args){
         try{
@@ -68,7 +79,6 @@ public class ProjectGUI extends JFrame implements ActionListener {
 
         panel.setBackground(bgColor);
         panel.setLayout(null);
-        System.out.println(panel.getSize());
         frame.add(panel);
 
         welcomeLabel = new JLabel("Welcome to the Application Form!");
@@ -76,7 +86,6 @@ public class ProjectGUI extends JFrame implements ActionListener {
         welcomeLabel.setForeground(textColor);
         welcomeLabel.setBounds(90,10,400,25);
         panel.add(welcomeLabel);
-        frame.setVisible(true);
 
         choiceOfTrans = new JLabel("Do you require delivery?");
         choiceOfTrans.setFont(secondHeader);
@@ -90,8 +99,8 @@ public class ProjectGUI extends JFrame implements ActionListener {
         boxYes.setForeground(textColor);
         boxYes.setBounds(5, 80, 100, 25);
         boxNo.setBounds(50, 80, 100, 25);
-        boxYes.setSelected(false);
-        boxNo.setSelected(false);
+        boxNo.setActionCommand("No");
+        boxYes.setActionCommand("Yes");
         panel.add(boxNo);
         panel.add(boxYes);
 
@@ -145,18 +154,22 @@ public class ProjectGUI extends JFrame implements ActionListener {
 
         combo1 = new JComboBox(array);
         combo1.setBounds(4, 302, 100, 25);
+        combo1.addActionListener(new ProjectGUI());
         panel.add(combo1);
 
         combo2 = new JComboBox(array);
         combo2.setBounds(4, 352, 100, 25);
+        combo2.addActionListener(new ProjectGUI());
         panel.add(combo2);
 
         combo3 = new JComboBox(array);
         combo3.setBounds(4, 402, 100, 25);
+        combo3.addActionListener(new ProjectGUI());
         panel.add(combo3);
 
         combo4 = new JComboBox(array);
         combo4.setBounds(4, 452, 100, 25);
+        combo4.addActionListener(new ProjectGUI());
         panel.add(combo4);
 
         choices = new JLabel("Choose a hamper configuration: ");
@@ -167,6 +180,7 @@ public class ProjectGUI extends JFrame implements ActionListener {
 
         combo5 = new JComboBox(choiceHampers);
         combo5.setBounds(4, 515, 300, 25);
+        combo5.addActionListener(new ProjectGUI());
         panel.add(combo5);
 
         generateForm = new JButton("Generate Hamper");
@@ -174,16 +188,86 @@ public class ProjectGUI extends JFrame implements ActionListener {
         generateForm.setBounds(130, 560, 200, 30);
         generateForm.setBackground(buttonColor);
         generateForm.setForeground(buttonTextColor);
+        generateForm.addActionListener(new ProjectGUI());
         panel.add(generateForm);
 
         progressBar = new JProgressBar(0);
         progressBar.setBounds(130, 600, 200, 30);
+        progressBar.setValue(0);
         progressBar.setBackground(textColor);
+        progressBar.setStringPainted(true);
+
         panel.add(progressBar);
 
+        group1 = new ButtonGroup();
+        group1.add(boxNo);
+        group1.add(boxYes);
+        boxYes.addActionListener(new ProjectGUI());
+        boxNo.addActionListener(new ProjectGUI());
+
+
+        success = new JLabel();
+        success.setFont(textFont);
+        success.setForeground(textColor);
+        success.setBounds(130, 630, 300, 30);
+        panel.add(success);
+
+
         frame.setVisible(true);
+
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {}
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource().equals(generateForm)){
+            if (boxNo.isSelected()){
+                this.choice = false;
+            }
+            if (boxYes.isSelected()){
+                this.choice = true;
+            }
+            this.familyName = orderNameField.getText();
+            this.currDate = orderDateField.getText();
+            this.numAdultMales = combo1.getSelectedIndex();
+            this.numAdultFemales = combo2.getSelectedIndex();
+            this.numChildUnder8 = combo3.getSelectedIndex();
+            this.numChildOver8 = combo4.getSelectedIndex();
+            this.hamperChoice =combo5.getSelectedIndex();
+            //Following are index values for hamperChoice
+            //0 = Balanced
+            //1 = Calorie Deficit (low calories)
+            //2 = Muscle Building (high protein)
+            //3 = Keto (low grains/carbs)
+            if (!(boxYes.isSelected()) && !(boxNo.isSelected())){
+                success.setText("Please select a choice of delivery!");
+            }
+            else if (orderNameField.getText().equals("")){
+                success.setText("Please enter an input for family/last name!");
+            }
+            else if (combo1.getSelectedIndex() == 0 && combo2.getSelectedIndex() == 0 && combo3.getSelectedIndex() == 0
+                    && combo4.getSelectedIndex() == 0){
+                success.setText("Please enter valid values for family size!");
+            }
+            else{
+                success.setText("Generating hamper and order form!");
+            }
+
+            generateApplicationForm();
+        }
+    }
+
+    public void generateApplicationForm(){
+        ApplicationForm form = new ApplicationForm(choice, familyName, currDate, numAdultMales,
+                numAdultFemales, numChildUnder8, numChildOver8, hamperChoice);
+
+        System.out.println("Transport Req: " + form.getTransportRequirement());
+        System.out.println("Family name: " + form.getOrderName());
+        System.out.println("Order date: " + form.getOrderDate());
+        System.out.println("Num adult males: " + form.getCountAdultMales());
+        System.out.println("Num adult females: " + form.getCountAdultFemales());
+        System.out.println("Num child under 8: " + form.getCountChildUnder8());
+        System.out.println("Num child over 8: " + form.getCountChildOver8());
+        System.out.println("Hamper choice: " + form.getHamperChoice());
+
+    }
 }
