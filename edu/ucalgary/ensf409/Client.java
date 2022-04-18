@@ -1,55 +1,68 @@
+/*
+@Authors: Manraj Singh, Kartik Sharma, Sajan Hayer, Kirtan Kakadiya
+@Version: 2.5
+@Since: 1.0
+ */
+
 package edu.ucalgary.ensf409;
 
-import javax.swing.plaf.nimbus.State;
+import javax.swing.*;
 import java.sql.*;
 import java.util.*;
 
 
 public class Client {
-    private String clientID;
-    private String clientType = ""; //dont hink we need this now
+    //class variables
+    private int clientID;
     private int recProtein = 0;
     private int recGrain = 0;
-    private int recFV = 0; 
+    private int recFV = 0;
     private int recCalories = 0;
     private int recOther = 0;
+    private JLabel success;
 
+    //variables to keep track of amount of members
     private int numberOfChildOver8 = 0;
     private int numberOfChildUnder8 = 0;
     private int numberOfFemales = 0;
     private int numberOfMales = 0;
-    
 
-    private HashMap<String,Nutrition> familyList = new HashMap<String,Nutrition>(); 
+    private HashMap<String,Nutrition> familyList = new HashMap<>();
 
+    //connection variable
     private Connection dbConnect;
+    //result variable to store results
     private ResultSet results;
 
+    //constructor for class to set id and values of members
+    //intialize connections and set required nutrition amounts
     public Client(
-        String id, 
-        int numberOfMales, 
-        int numberOfFemales, 
-        int numberOfChildOver8,
-        int numberOfChildUnder8) throws SQLException
+            int id,
+            int numberOfMales,
+            int numberOfFemales,
+            int numberOfChildOver8,
+            int numberOfChildUnder8,
+            JLabel success
+    ) throws SQLException, IllegalArgumentException
     {
-            this.clientID = id;
-            this.numberOfMales = numberOfMales;
-            this.numberOfFemales = numberOfFemales;
-            this.numberOfChildUnder8= numberOfChildUnder8;
-            this.numberOfChildOver8 = numberOfChildOver8;
+        if (id > 10 || numberOfMales > 10 || numberOfFemales > 10 || numberOfChildOver8 > 10 || numberOfChildUnder8 > 10){
+            throw new IllegalArgumentException();
+        }
+        this.clientID = id;
+        this.numberOfMales = numberOfMales;
+        this.numberOfFemales = numberOfFemales;
+        this.numberOfChildUnder8= numberOfChildUnder8;
+        this.numberOfChildOver8 = numberOfChildOver8;
+        this.success = success;
 
-            getDataFromDatabase();
-            setClientDailyNeedValues();
+        initializeConnection();
+        getDataFromDatabase();
+        setClientDailyNeedValues();
     }
 
-    
-
-    public String getClientID(){
+    //getters for class
+    public int getClientID(){
         return this.clientID;
-    }
-
-    public String getClientType(){
-        return this.clientType;
     }
 
     public int getProtein(){
@@ -72,80 +85,78 @@ public class Client {
         return this.recOther;
     }
 
+    //setting the weekly needs for members of the family
     public void setClientDailyNeedValues(){
+        //checks to see if there is adult males in the order
         if(numberOfMales != 0){
             Nutrition maleNeeds = familyList.get("Adult Male");
-            recProtein += (maleNeeds.getProteinPercentage()) * numberOfMales;
-            recFV += (maleNeeds.getFVPercentage()) * numberOfMales;
-            recGrain += (maleNeeds.getGrainPercentage()) * numberOfMales;
-            recOther += (maleNeeds.getOtherPercentage()) * numberOfMales;
-            recCalories += (maleNeeds.getDailyCalories()) * numberOfMales;
+            //set the required nutrition values for each section for the number of males and for the week
+            recProtein += (maleNeeds.getProteinPercentage()) * numberOfMales * 7;
+            recFV += (maleNeeds.getFVPercentage()) * numberOfMales * 7;
+            recGrain += (maleNeeds.getGrainPercentage())  * numberOfMales * 7;
+            recOther += (maleNeeds.getOtherPercentage())  *numberOfMales * 7;
         }
 
+        //the next if statements do the same as the above one but set the other members of the family
         if(numberOfFemales != 0){
             Nutrition femaleNeeds = familyList.get("Adult Female");
-            recProtein += (femaleNeeds.getProteinPercentage()) * numberOfFemales;
-            recFV += (femaleNeeds.getFVPercentage()) * numberOfFemales;
-            recGrain += (femaleNeeds.getGrainPercentage()) * numberOfFemales;
-            recOther += (femaleNeeds.getOtherPercentage()) * numberOfFemales;
-            recCalories += (femaleNeeds.getDailyCalories()) * numberOfFemales;
+            recProtein += (femaleNeeds.getProteinPercentage())  * numberOfFemales * 7;
+            recFV += (femaleNeeds.getFVPercentage())  * numberOfFemales * 7;
+            recGrain += (femaleNeeds.getGrainPercentage())  * numberOfFemales * 7;
+            recOther += (femaleNeeds.getOtherPercentage())  * numberOfFemales * 7;
         }
 
         if(numberOfChildOver8 != 0){
             Nutrition childrenOver8Needs = familyList.get("Child over 8");
-            recProtein += (childrenOver8Needs.getProteinPercentage()) * numberOfChildOver8;
-            recFV += (childrenOver8Needs.getFVPercentage()) * numberOfChildOver8;
-            recGrain += (childrenOver8Needs.getGrainPercentage()) * numberOfChildOver8;
-            recOther += (childrenOver8Needs.getOtherPercentage()) * numberOfChildOver8;
-            recCalories += (childrenOver8Needs.getDailyCalories()) * numberOfChildOver8;
+            recProtein += (childrenOver8Needs.getProteinPercentage())   * numberOfChildOver8 * 7;
+            recFV += (childrenOver8Needs.getFVPercentage())  * numberOfChildOver8 * 7;
+            recGrain += (childrenOver8Needs.getGrainPercentage())  * numberOfChildOver8 * 7;
+            recOther += (childrenOver8Needs.getOtherPercentage())   * numberOfChildOver8 * 7;
         }
 
         if(numberOfChildUnder8 != 0){
             Nutrition chilrenUnder8Needs = familyList.get("Child under 8");
-            recProtein += (chilrenUnder8Needs.getProteinPercentage()) * numberOfChildUnder8;
-            recFV += (chilrenUnder8Needs.getFVPercentage()) * numberOfChildUnder8;
-            recGrain += (chilrenUnder8Needs.getGrainPercentage()) * numberOfChildUnder8;
-            recOther += (chilrenUnder8Needs.getOtherPercentage()) * numberOfChildUnder8;
-            recCalories += (chilrenUnder8Needs.getDailyCalories()) * numberOfChildUnder8;
+            recProtein += (chilrenUnder8Needs.getProteinPercentage()) * numberOfChildUnder8 * 7;
+            recFV += (chilrenUnder8Needs.getFVPercentage())  * numberOfChildUnder8 * 7;
+            recGrain += (chilrenUnder8Needs.getGrainPercentage())  * numberOfChildUnder8 * 7;
+            recOther += (chilrenUnder8Needs.getOtherPercentage())  * numberOfChildUnder8 * 7;
         }
     }
+
+    //method to initialize connection to the database
     public void initializeConnection() throws SQLException {
         try{
-            dbConnect = DriverManager.getConnection("jdbc:mysql://localhost/food_inventory", "root", "ensf409");
-            System.out.println("connection succeful");
+            dbConnect = DriverManager.getConnection("jdbc:mysql://localhost/food_inventory", "student", "ensf409");
         } catch (SQLException e){
-            e.printStackTrace();
+            success.setText("Connection to database failed! Exit and try again!");
             throw new SQLException("Cannot connect to the database!");
         }
     }
-    
-    public void getDataFromDatabase() throws SQLException{
+
+    //method to get the required amount for adult males, females, children over and under 8 from the database
+    public void getDataFromDatabase() throws SQLException {
         initializeConnection();
+
         try {
             Statement myStatement = dbConnect.createStatement();
             results = myStatement.executeQuery("SELECT * FROM daily_client_needs");
 
-            while(results.next()){
-                int wholeGrain = Integer.parseInt(results.getString("WholeGrains"));
-                int fruitVeggie = Integer.parseInt(results.getString("FruitVeggies"));
-                int protein = Integer.parseInt(results.getString("Protein"));
-                int other = Integer.parseInt(results.getString("Other"));
-                int calories = Integer.parseInt(results.getString("Calories"));  
-                Nutrition nutritionValues = new Nutrition(wholeGrain, fruitVeggie, protein, other, calories);
+            while (results.next()) {
+                int calories = Integer.parseInt(results.getString("Calories"));
+                int wholeGrain = (Integer.parseInt(results.getString("WholeGrains")) * calories) / 100;
+                int fruitVeggie = (Integer.parseInt(results.getString("FruitVeggies")) * calories) / 100;
+                int protein = (Integer.parseInt(results.getString("Protein")) * calories) / 100;
+                int other = (Integer.parseInt(results.getString("Other")) * calories) / 100;
+
+                Nutrition nutritionValues = new Nutrition(wholeGrain, fruitVeggie, protein, other);
                 familyList.put(results.getString("Client"), nutritionValues);
-                
             }
             myStatement.close();
-        
+
         } catch (Exception e) {
-            System.out.println("failed");
-            //TODO: Need to make it so it print an error message in the GUI but the program doesnt terminate
+            success.setText("Connection to database failed! Exit and try again!");
+        }
     }
-    
-
-    }
-
-
 
 }
 

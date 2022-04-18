@@ -1,24 +1,39 @@
 /*
 @Authors: Manraj Singh, Kartik Sharma, Sajan Hayer, Kirtan Kakadiya
-@Version: 1.0
+@Version: 2.5
 @Since: 1.0
  */
 
+//declaring package statement
 package edu.ucalgary.ensf409;
 
+//importing libraries
+import javax.swing.*;
+import java.sql.SQLException;
+
+//main ApplicationForm class
 public class ApplicationForm {
-    private final boolean TRANSPORT_REQUIREMENT;
-    private final String ORDER_NAME;
-    private final String ORDER_DATE;
-    private final int countAdultMales;
-    private final int countAdultFemales;
-    private final int countChildUnder8;
-    private final int countChildOver8;
-    private final int hamperChoice;
+    //declaring required variables
+    private Client client;
+    private static Hampers mainHamper;
+    private int ID;
+    private boolean TRANSPORT_REQUIREMENT;
+    private String ORDER_NAME;
+    private String ORDER_DATE;
+    private int countAdultMales;
+    private int countAdultFemales;
+    private int countChildUnder8;
+    private int countChildOver8;
 
+    //main constructor for the ApplicationForm class
+    public ApplicationForm(int id, boolean transportChoice, String orderName, String orderDate, int numAdultMales,
+                           int numAdultFemales, int numChildUnder8, int numChildOver8, Inventory inventory, JLabel success) throws SQLException, IllegalArgumentException {
 
-    public ApplicationForm(boolean transportChoice, String orderName, String orderDate, int numAdultMales,
-                           int numAdultFemales, int numChildUnder8, int numChildOver8, int hampChoice){
+        if (id > 10 || numAdultFemales > 10 || numAdultMales > 10 || numChildOver8 > 10 || numChildUnder8 > 10){
+            throw new IllegalArgumentException();
+        }
+
+        this.ID = id;
         this.TRANSPORT_REQUIREMENT = transportChoice;
         this.ORDER_NAME = orderName;
         this.ORDER_DATE = orderDate;
@@ -26,42 +41,27 @@ public class ApplicationForm {
         this.countAdultFemales = numAdultFemales;
         this.countChildUnder8 = numChildUnder8;
         this.countChildOver8 = numChildOver8;
-        this.hamperChoice = hampChoice;
+
+        //creating a new Client object
+        client = new Client(ID, countAdultMales, countAdultFemales, countChildOver8, countChildUnder8, success);
+        //creating a new Hamper object, which uses the Client object to create it
+        mainHamper = new Hampers(client, inventory, success);
     }
 
-    public boolean getTransportRequirement(){
-        return TRANSPORT_REQUIREMENT;
+    //method to return the ID of each application form
+    public int getID(){
+        return ID;
     }
-    public String getOrderName(){
+
+    //method to return the orderName of each order form
+    public String getOrderName() {
         return ORDER_NAME;
     }
-    public String getOrderDate(){
+
+    //method to return the orderDate of each order form
+    public String getOrderDate() {
         return ORDER_DATE;
     }
-    public int getCountAdultMales(){
-        return countAdultMales;
-    }
-    public int getCountAdultFemales(){
-        return countAdultFemales;
-    }
-    public int getCountChildUnder8(){
-        return countChildUnder8;
-    }
-    public int getCountChildOver8(){
-        return countChildOver8;
-    }
-    public String getHamperChoice(){
-        if (hamperChoice == 0){
-            return "Balanced";
-        }
-        if (hamperChoice == 1){
-            return "Calorie Deficit (low calories)";
-        }
-        if (hamperChoice == 2){
-            return "Muscle Building (high protein)";
-        }
-        else{
-            return "Keto (low grains/carbs)";
-        }
-    }
+
+
 }
